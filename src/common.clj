@@ -8,3 +8,10 @@
 
 (defn get-lines [file] 
   (str/split-lines (get-data file)))
+
+
+(defn load-map
+  [file]
+  (let [data (common/get-lines file)
+        grid (mapv (comp vec chars char-array) data)]
+    grid))
