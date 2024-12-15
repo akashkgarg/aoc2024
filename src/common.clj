@@ -54,3 +54,6 @@
           init
           (range (count grid))))
 
+(defn vecadd
+  [a b]
+  (mapv #(+ %1 %2) a b))
