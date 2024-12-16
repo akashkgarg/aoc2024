@@ -57,3 +57,7 @@
 (defn vecadd
   [a b]
   (mapv #(+ %1 %2) a b))
+
+(defn vecsub
+  [a b]
+  (mapv #(- %1 %2) a b))
