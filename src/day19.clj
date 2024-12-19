@@ -8,28 +8,29 @@
          '[common])
 
 (defn match
-  [towels logo invalid-logos]
+  [towels logo logo-counts]
   (cond 
     (empty? logo)
-    [true invalid-logos]
+    [1 (update logo-counts logo (fnil inc 0))]
 
-    (invalid-logos logo)
-    [false invalid-logos]
+    (contains? logo-counts logo)
+    [(logo-counts logo) logo-counts]
 
     :else 
     (let [matched-towels (filter #(str/starts-with? logo %) towels)]
       (if (empty? matched-towels)
-        [false (conj invalid-logos logo)]
+        [0 (assoc logo-counts logo 0)]
         (loop [matches matched-towels
-               invalid invalid-logos]
+               counts logo-counts 
+               curr-count 0]
           (if (empty? matches)
-            [false (conj invalid logo)]
+            [curr-count (assoc counts logo curr-count)]
             (let [first-match (first matches)
                   rest-matches (rest matches)
-                  [is-match additional-invalid] (match towels (subs logo (count first-match)) invalid)]
-              (if is-match
-                [true invalid]
-                (recur rest-matches (into invalid additional-invalid))))))))))
+                  [add-count new-counts] (match towels (subs logo (count first-match)) counts)]
+              (recur rest-matches 
+                     new-counts
+                     (+ add-count curr-count)))))))))
 
 (defn run 
   [opts]
@@ -37,12 +38,16 @@
         [towels-str _ logos] (partition-by #(= % "") lines)
         towels (map str/trim (str/split (first towels-str) #","))]
     (loop [logos logos
-           invalid-logos #{}
+           total-matches 0
            count-true 0]
       (if (not (empty? logos))
         (let [logo (first logos)
-              [is-match additional-invalid] (match towels logo invalid-logos)
-              new-count (if is-match (inc count-true) count-true)]
-          (println "match logo = " logo " = " is-match)
-          (recur (rest logos) (into invalid-logos additional-invalid) new-count))
-        (println "valid logos: " count-true)))))
+              [num-matches new-counts] (match towels logo {})
+              pos-matches (if (> num-matches 0) (inc count-true) count-true)]
+          (println "match logo = " logo " = " num-matches)
+          (recur (rest logos) 
+                 (+ total-matches num-matches) 
+                 pos-matches))
+        (do 
+          (println "valid logos: " count-true)
+          (println "total matches: " total-matches))))))
