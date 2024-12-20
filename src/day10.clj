@@ -19,7 +19,7 @@
 
 (defn get-neighbors 
   [grid [r c]]
-  (filter #(common/in-bounds grid %)
+  (filter #(common/in-bounds? grid %)
           [[(dec r) c]
            [(inc r) c]
            [r (dec c)]

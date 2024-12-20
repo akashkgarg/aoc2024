@@ -23,7 +23,7 @@
                          char-array) data)]
     grid))
 
-(defn in-bounds
+(defn in-bounds?
   [grid [r c]]
   (let [nrows (count grid)
         ncols (count (first grid))]

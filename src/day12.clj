@@ -15,7 +15,7 @@
 
 (defn is-boundary 
   [grid item npos]
-  (or (not (common/in-bounds grid npos))
+  (or (not (common/in-bounds? grid npos))
       (not= (get-in grid npos) item)))
 
 
@@ -50,7 +50,7 @@
         [visited area boundary]
         (let [[pos & rest-to-visit] to-visit
               neighbors (filter (fn [nbr]
-                                  (and (common/in-bounds grid nbr)
+                                  (and (common/in-bounds? grid nbr)
                                        (= (get-in grid nbr) item)
                                        (not (contains? visited nbr))))
                                 (get-neighbors grid pos))]
