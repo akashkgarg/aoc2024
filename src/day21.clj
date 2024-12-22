@@ -57,22 +57,38 @@
                                                  new-nbrs)))]
             (recur new-q new-min-steps solutions)))))))
 
-(defn find-min-cost-path [code level max-levels]
+(def find-min-cost-path)
+
+(def memoized-min-path-from-to
+  (memoize 
+    (fn min-path-from-to [from to level max-levels]
+      (let [min-paths (find-min-paths-on-pad from to (if (= level 0) numpad-nbr-map dirpad-nbr-map))
+            min-steps (reduce (fn [min-steps path]
+                                (let [steps (find-min-cost-path (conj (second path) \A)
+                                                                (inc level)
+                                                                max-levels)]
+                                  (min steps min-steps)))
+                              1e16
+                              min-paths)]
+        min-steps))))
+
+(defn find-min-cost-path 
+  [code level max-levels]
   (if (= max-levels level)
     (count code)
     (loop [from \A
            to (first code)
            rest-code (rest code)
            total-steps 0]
-      (if (nil? to)
+      (cond 
+        (nil? to)
         total-steps
-        (let [min-paths (find-min-paths-on-pad from to (if (= level 0) numpad-nbr-map dirpad-nbr-map))
-              steps (map #(find-min-cost-path (conj (second %) \A) (inc level) max-levels) min-paths)
-              min-steps (apply min steps)]
-          (recur to (first rest-code) (rest rest-code) (+ total-steps min-steps)))))))
+        :else 
+        (recur to (first rest-code) (rest rest-code) (+ total-steps (memoized-min-path-from-to from to level max-levels)))))))
 
 (defn run
   [opts]
+  ;; pass in :levels = 3 for part 1, :levels 26 for part 2
   (let [max-levels (:levels opts)
         input (common/get-lines (:data opts))]
     (println (reduce + 0 (map #(* (find-min-cost-path % 0 max-levels)
